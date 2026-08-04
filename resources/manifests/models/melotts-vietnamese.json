@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "model_id": "melotts:vi-infore",
+  "provider": "melotts-vietnamese",
+  "display_name": "MeloTTS Vietnamese (Infore)",
+  "version": "G_463000-b3f704b8",
+  "license": "MIT",
+  "source_url": "https://huggingface.co/nmcuong/MeloTTS-Vietnamese",
+  "sends_data_off_device": false,
+  "estimated_size_bytes": 626316740,
+  "install_mode": "user_provided",
+  "requires_explicit_install": true,
+  "approved_for_local_use": true,
+  "approved_for_distribution": false
+}

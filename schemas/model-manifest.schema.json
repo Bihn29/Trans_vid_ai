@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vietdub.local/schemas/model-manifest.schema.json",
+  "title": "AI model manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "model_id", "provider", "display_name", "license", "sends_data_off_device", "estimated_size_bytes"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "model_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "provider": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "display_name": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "license": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "sends_data_off_device": { "type": "boolean" },
+    "estimated_size_bytes": { "type": "integer", "minimum": 0 }
+  }
+}

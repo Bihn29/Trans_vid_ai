@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vietdub.local/schemas/worker-response.schema.json",
+  "title": "Worker event protocol v1",
+  "oneOf": [
+    { "$ref": "#/$defs/progress" },
+    { "$ref": "#/$defs/completed" },
+    { "$ref": "#/$defs/failed" }
+  ],
+  "$defs": {
+    "baseProperties": {
+      "protocol_version": { "const": 1 },
+      "request_id": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "relative_path", "sha256", "size_bytes", "metadata"],
+      "properties": {
+        "type": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "relative_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$"
+        },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "size_bytes": { "type": "integer", "minimum": 0 },
+        "metadata": { "type": "object" }
+      }
+    },
+    "progress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "request_id", "event", "progress", "message"],
+      "properties": {
+        "protocol_version": { "$ref": "#/$defs/baseProperties/protocol_version" },
+        "request_id": { "$ref": "#/$defs/baseProperties/request_id" },
+        "event": { "const": "progress" },
+        "progress": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "message": { "type": "string", "minLength": 1, "maxLength": 300 }
+      }
+    },
+    "completed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "request_id", "event", "artifacts", "metrics", "warnings"],
+      "properties": {
+        "protocol_version": { "$ref": "#/$defs/baseProperties/protocol_version" },
+        "request_id": { "$ref": "#/$defs/baseProperties/request_id" },
+        "event": { "const": "completed" },
+        "artifacts": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+        "metrics": { "type": "object" },
+        "warnings": {
+          "type": "array",
+          "maxItems": 100,
+          "items": { "type": "string", "maxLength": 500 }
+        }
+      }
+    },
+    "failed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "request_id", "event", "error_code", "safe_message"],
+      "properties": {
+        "protocol_version": { "$ref": "#/$defs/baseProperties/protocol_version" },
+        "request_id": { "$ref": "#/$defs/baseProperties/request_id" },
+        "event": { "const": "failed" },
+        "error_code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$" },
+        "safe_message": { "type": "string", "minLength": 1, "maxLength": 500 }
+      }
+    }
+  }
+}
+

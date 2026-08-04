@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "model_id": "opus-mt:zh-vi",
+  "provider": "opus-mt",
+  "display_name": "OPUS-MT Chinese to Vietnamese",
+  "version": "opus-2020-06-17-ct2-int8",
+  "license": "Apache-2.0",
+  "source_url": "https://huggingface.co/Helsinki-NLP/opus-mt-zh-vi",
+  "sends_data_off_device": false,
+  "estimated_size_bytes": 86000000,
+  "install_mode": "user_provided",
+  "requires_explicit_install": true,
+  "approved_for_local_use": true,
+  "approved_for_distribution": false
+}

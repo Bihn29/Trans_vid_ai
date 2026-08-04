@@ -1,0 +1,1 @@
+{"schema_version":1,"provider_id":"openai-compatible","approved":true,"sends_data_off_device":true,"terms_url":"https://openai.com/policies/service-terms/","voices":[{"voice_id":"alloy","display_name":"Alloy","language":"multilingual"},{"voice_id":"nova","display_name":"Nova","language":"multilingual"}]}

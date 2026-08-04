@@ -1,0 +1,1 @@
+{"schema_version":1,"engine_id":"energy-mask-v1","display_name":"VietDub Energy Mask","version":"1.0.0","approved":true,"license":"UNLICENSED","source":"built-in clean-room implementation","distribution_mode":"bundled_source","install":{"required":false,"silent_download":false},"consent":{"required":false,"sends_data_off_device":false},"model":{"required":false,"files":[]}}

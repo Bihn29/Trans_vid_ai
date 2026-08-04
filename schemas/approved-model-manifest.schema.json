@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vietdub.local/schemas/approved-model-manifest.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "model_id", "provider", "display_name", "version", "license",
+    "source_url", "sends_data_off_device", "estimated_size_bytes", "install_mode",
+    "requires_explicit_install", "approved_for_local_use", "approved_for_distribution"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "model_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "provider": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "display_name": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "version": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "license": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "source_url": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "sends_data_off_device": { "type": "boolean" },
+    "estimated_size_bytes": { "type": "integer", "minimum": 1 },
+    "install_mode": { "const": "user_provided" },
+    "requires_explicit_install": { "const": true },
+    "approved_for_local_use": { "type": "boolean" },
+    "approved_for_distribution": { "const": false }
+  }
+}

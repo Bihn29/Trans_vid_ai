@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vietdub.local/schemas/media-metadata.schema.json",
+  "title": "VietDub probed media metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_artifact_id", "metadata"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "source_artifact_id": { "type": "string", "format": "uuid" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["duration_ms", "width", "height", "frame_rate", "video_codec", "audio_codec", "container", "rotation_degrees"],
+      "properties": {
+        "duration_ms": { "type": "integer", "minimum": 1, "maximum": 604800000 },
+        "width": { "type": "integer", "minimum": 1, "maximum": 16384 },
+        "height": { "type": "integer", "minimum": 1, "maximum": 16384 },
+        "frame_rate": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000 },
+        "video_codec": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "audio_codec": { "type": ["string", "null"], "maxLength": 64 },
+        "container": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "rotation_degrees": { "type": "integer", "minimum": -360, "maximum": 360 }
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vietdub.local/schemas/composer-config.schema.json",
+  "$defs": {
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height", "startMs", "endMs", "opacity"],
+      "properties": {
+        "x": { "type": "integer", "minimum": 0 },
+        "y": { "type": "integer", "minimum": 0 },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "startMs": { "type": "integer", "minimum": 0 },
+        "endMs": { "type": "integer", "minimum": 1 },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["projectId", "trimStartMs", "trimEndMs", "crop", "aspect", "paddingColor", "blurRadius", "flip", "speed", "subtitleMode", "previewPreset", "textOverlays", "imageOverlays", "coverRegions"],
+  "properties": {
+    "projectId": { "type": "string", "format": "uuid" },
+    "trimStartMs": { "type": "integer", "minimum": 0 },
+    "trimEndMs": { "type": ["integer", "null"], "minimum": 1 },
+    "crop": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "integer", "minimum": 0 },
+        "y": { "type": "integer", "minimum": 0 },
+        "width": { "type": "integer", "minimum": 2 },
+        "height": { "type": "integer", "minimum": 2 }
+      }
+    },
+    "aspect": { "enum": ["source", "landscape16x9", "square1x1", "vertical9x16"] },
+    "paddingColor": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "blurRadius": { "type": "number", "minimum": 0, "maximum": 20 },
+    "flip": { "enum": ["none", "horizontal", "vertical", "both"] },
+    "speed": { "type": "number", "minimum": 0.25, "maximum": 4 },
+    "subtitleMode": { "enum": ["none", "soft", "burned"] },
+    "previewPreset": { "enum": ["draft", "final"] },
+    "textOverlays": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["text", "x", "y", "fontSize", "color", "startMs", "endMs"],
+        "properties": {
+          "text": { "type": "string", "minLength": 1, "maxLength": 500 },
+          "x": { "type": "integer", "minimum": 0 },
+          "y": { "type": "integer", "minimum": 0 },
+          "fontSize": { "type": "integer", "minimum": 8, "maximum": 256 },
+          "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+          "startMs": { "type": "integer", "minimum": 0 },
+          "endMs": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "imageOverlays": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifactId", "kind", "region"],
+        "properties": {
+          "artifactId": { "type": "string", "format": "uuid" },
+          "kind": { "enum": ["logo", "watermark"] },
+          "region": { "$ref": "#/$defs/region" }
+        }
+      }
+    },
+    "coverRegions": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["region", "color"],
+        "properties": {
+          "region": { "$ref": "#/$defs/region" },
+          "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+        }
+      }
+    }
+  }
+}

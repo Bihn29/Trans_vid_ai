@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vietdub.local/schemas/release-manifest.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "product", "version", "channel", "artifactFilename", "sha256", "sizeBytes", "authenticodeRequired", "automaticUpdates"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "product": { "const": "VietDub Studio" },
+    "version": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "channel": { "enum": ["stable", "beta"] },
+    "artifactFilename": { "type": "string", "pattern": "^[A-Za-z0-9._-]+\\.(exe|msi)$", "maxLength": 128 },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "sizeBytes": { "type": "integer", "minimum": 1 },
+    "authenticodeRequired": { "const": true },
+    "automaticUpdates": { "const": false }
+  }
+}

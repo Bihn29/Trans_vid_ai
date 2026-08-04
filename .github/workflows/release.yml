@@ -1,0 +1,128 @@
+name: Signed Windows release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      WINDOWS_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
+      WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt,clippy
+      - name: Require signing secrets
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_CERTIFICATE_BASE64) -or [string]::IsNullOrWhiteSpace($env:WINDOWS_CERTIFICATE_PASSWORD)) { throw "Release signing secrets are required" }
+      - name: Install locked dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          python -m pip install -r requirements-dev.txt
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+      - run: pnpm test
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - run: pnpm schemas:check
+      - run: python tools/release_audit.py --check
+      - run: pnpm audit --audit-level high
+      - name: Audit Rust advisories
+        shell: pwsh
+        run: |
+          cargo install cargo-audit --version 0.22.2 --locked
+          cargo audit --ignore RUSTSEC-2026-0194 --ignore RUSTSEC-2026-0195
+      - name: Build, sign, and verify NSIS release
+        shell: pwsh
+        run: |
+          $certificate = Join-Path $env:RUNNER_TEMP "vietdub-release.pfx"
+          $releaseConfig = Join-Path $env:RUNNER_TEMP "tauri.release.conf.json"
+          $imported = @()
+          $signingCertificate = $null
+          [IO.File]::WriteAllBytes($certificate, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_BASE64))
+          try {
+            $password = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+            $imported = @(Import-PfxCertificate -FilePath $certificate -CertStoreLocation Cert:\CurrentUser\My -Password $password)
+            $signingCertificate = $imported | Where-Object HasPrivateKey | Select-Object -First 1
+            if ($null -eq $signingCertificate) { throw "PFX contains no private signing key" }
+            @{
+              bundle = @{
+                windows = @{
+                  certificateThumbprint = $signingCertificate.Thumbprint
+                  digestAlgorithm = "sha256"
+                  timestampUrl = "https://timestamp.digicert.com"
+                  tsp = $true
+                }
+              }
+            } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $releaseConfig -Encoding utf8
+            pnpm --filter @vietdub/desktop exec tauri build --bundles nsis --ci --config $releaseConfig
+            if ($LASTEXITCODE -ne 0) { throw "Tauri release build failed" }
+            $application = (Resolve-Path "target/release/vietdub-studio.exe").Path
+            $installer = Get-ChildItem target/release/bundle/nsis -Filter *.exe | Select-Object -Single -ExpandProperty FullName
+            signtool verify /pa /v $application
+            signtool verify /pa /v $installer
+            "VIETDUB_SIGNED_INSTALLER=$installer" | Out-File -FilePath $env:GITHUB_ENV -Append
+          } finally {
+            foreach ($item in $imported) { Remove-Item -LiteralPath "Cert:\CurrentUser\My\$($item.Thumbprint)" -Force -ErrorAction SilentlyContinue }
+            Remove-Item -LiteralPath $certificate -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $releaseConfig -Force -ErrorAction SilentlyContinue
+          }
+      - name: Generate signed release manifest
+        shell: pwsh
+        run: python tools/build_release_manifest.py --artifact $env:VIETDUB_SIGNED_INSTALLER --version 0.1.0 --channel stable --output target/release/bundle/nsis/release-manifest.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-release-candidate
+          path: |
+            target/release/bundle/nsis/*.exe
+            target/release/bundle/nsis/release-manifest.json
+            docs/release/sbom.cdx.json
+            docs/release/THIRD_PARTY_NOTICES.md
+          if-no-files-found: error
+          retention-days: 1
+
+  clean-machine-acceptance:
+    needs: build-sign
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: signed-release-candidate
+          path: release-candidate
+      - name: Verify, install, and uninstall on fresh runner
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem release-candidate -Recurse -Filter *.exe | Select-Object -Single -ExpandProperty FullName
+          signtool verify /pa /v $installer
+          Start-Process -FilePath $installer -ArgumentList "/S" -Wait
+          $installed = Join-Path $env:LOCALAPPDATA "VietDub Studio/vietdub-studio.exe"
+          if (-not (Test-Path -LiteralPath $installed -PathType Leaf)) { throw "Installed executable was not found" }
+          signtool verify /pa /v $installed
+          $uninstaller = Join-Path $env:LOCALAPPDATA "VietDub Studio/uninstall.exe"
+          if (-not (Test-Path -LiteralPath $uninstaller -PathType Leaf)) { throw "Uninstaller was not found" }
+          Start-Process -FilePath $uninstaller -ArgumentList "/S" -Wait
+          if (Test-Path -LiteralPath $installed) { throw "Silent uninstall left the executable behind" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vietdub-studio-signed-windows
+          path: release-candidate
+          if-no-files-found: error

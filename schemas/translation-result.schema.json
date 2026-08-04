@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vietdub.local/schemas/translation-result.schema.json",
+  "title": "Translation block result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "translations"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "translations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "text"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "text": { "type": "string", "minLength": 1, "maxLength": 30000, "pattern": ".*\\S.*" }
+        }
+      }
+    }
+  }
+}

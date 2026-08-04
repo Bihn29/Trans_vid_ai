@@ -1,0 +1,13 @@
+@echo off
+set "VIETDUB_PYTHON_PATH=D:\tai_lieu\Trans_Vid_Ai\.venv\Scripts\python.exe"
+set "VIETDUB_TTS_PYTHON_PATH=D:\tai_lieu\Trans_Vid_Ai\.local\tts-venv\Scripts\python.exe"
+set "VIETDUB_WORKERS_PATH=D:\tai_lieu\Trans_Vid_Ai\workers"
+set "VIETDUB_ASR_MODEL_PATH=D:\tai_lieu\Trans_Vid_Ai\.local\models\faster-whisper-large-v3"
+set "VIETDUB_TRANSLATION_MODEL_PATH=D:\tai_lieu\Trans_Vid_Ai\.local\models\opus-mt-zh-vi-ct2"
+set "VIETDUB_TTS_MODEL_PATH=D:\tai_lieu\Trans_Vid_Ai\.local\models\melotts-vi"
+set "VIETDUB_TTS_CACHE_PATH=D:\tai_lieu\Trans_Vid_Ai\.local\cache\huggingface-tts"
+set "VIETDUB_FFMPEG_PATH=C:\tmp\vietdub-ffmpeg-lgpl-20260802\extracted\ffmpeg-master-latest-win64-lgpl-shared\bin\ffmpeg.exe"
+set "VIETDUB_FFMPEG_SHA256=35499ae73bd5a4b321a990619d1537a7449f4b1cf8ece10a8e1e44a3f429e058"
+set "VIETDUB_FFPROBE_PATH=C:\tmp\vietdub-ffmpeg-lgpl-20260802\extracted\ffmpeg-master-latest-win64-lgpl-shared\bin\ffprobe.exe"
+set "VIETDUB_FFPROBE_SHA256=4498c0b552225168356b87503a78af40c8c0cfa446b5d136f3a273a24acd3c9f"
+start "" "D:\tai_lieu\Trans_Vid_Ai\target\debug\vietdub-studio.exe"

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vietdub.local/schemas/segment.schema.json",
+  "title": "Normalized transcript segment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "project_id", "sequence", "start_ms", "end_ms", "source_text", "translated_text", "speaker_id", "voice_id", "enabled", "review_status", "source_hash", "translation_hash", "voice_hash", "created_at", "updated_at"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "id": { "type": "string", "format": "uuid" },
+    "project_id": { "type": "string", "format": "uuid" },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "start_ms": { "type": "integer", "minimum": 0 },
+    "end_ms": { "type": "integer", "minimum": 1 },
+    "source_text": { "type": "string" },
+    "translated_text": { "type": "string" },
+    "speaker_id": { "type": ["string", "null"], "format": "uuid" },
+    "voice_id": { "type": ["string", "null"] },
+    "asr_confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "estimated_duration_ms": { "type": ["integer", "null"], "minimum": 0 },
+    "target_duration_ms": { "type": ["integer", "null"], "minimum": 0 },
+    "playback_rate": { "type": "number", "exclusiveMinimum": 0 },
+    "enabled": { "type": "boolean" },
+    "review_status": { "enum": ["unreviewed", "approved", "needs_attention"] },
+    "source_hash": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "translation_hash": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "voice_hash": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "audio_artifact_id": { "type": ["string", "null"], "format": "uuid" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}
+

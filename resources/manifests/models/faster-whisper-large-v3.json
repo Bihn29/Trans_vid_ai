@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "model_id": "faster-whisper:large-v3",
+  "provider": "faster-whisper",
+  "display_name": "Faster Whisper Large v3",
+  "version": "large-v3-2023-11-23",
+  "license": "MIT",
+  "source_url": "https://huggingface.co/Systran/faster-whisper-large-v3",
+  "sends_data_off_device": false,
+  "estimated_size_bytes": 3000000000,
+  "install_mode": "user_provided",
+  "requires_explicit_install": true,
+  "approved_for_local_use": true,
+  "approved_for_distribution": false
+}

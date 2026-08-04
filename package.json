@@ -1,0 +1,25 @@
+{
+  "name": "vietdub-studio",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=22.12 <23",
+    "pnpm": "9.15.4"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @vietdub/desktop run tauri dev",
+    "build": "pnpm run build:web && cargo build --workspace --locked",
+    "build:web": "pnpm --filter @vietdub/desktop run build",
+    "lint": "pnpm run lint:web && cargo fmt --all -- --check && python -m ruff check workers tests tools",
+    "lint:web": "pnpm --filter @vietdub/desktop run lint",
+    "typecheck": "pnpm --filter @vietdub/desktop run typecheck && python -m mypy",
+    "test": "pnpm run test:web && pnpm run test:rust && pnpm run test:python && pnpm run test:integration",
+    "test:rust": "cargo test --workspace --locked",
+    "test:web": "pnpm --filter @vietdub/desktop run test:run",
+    "test:python": "python -m pytest workers -m \"not integration\"",
+    "test:integration": "python -m pytest tests/integration",
+    "schemas:check": "python tools/validate_schemas.py",
+    "release:audit": "python tools/release_audit.py --check"
+  }
+}
