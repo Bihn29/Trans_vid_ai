@@ -24,6 +24,11 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
+      - name: Export Python executable
+        shell: pwsh
+        run: |
+          $python = python -c "import sys; print(sys.executable)"
+          "VIETDUB_PYTHON=$python" >> $env:GITHUB_ENV
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt,clippy
