@@ -37,7 +37,7 @@ fn root() -> PathBuf {
 fn python() -> PathBuf {
     env::var("VIETDUB_PYTHON")
         .map(PathBuf::from)
-        .unwrap_or_else(|_| root().join(".venv/Scripts/python.exe"))
+        .unwrap_or_else(|_| PathBuf::from("python"))
 }
 fn stage(project: Uuid) -> NewStageRun {
     let cache = CacheDescriptor {
