@@ -35,9 +35,20 @@ fn root() -> PathBuf {
         .to_path_buf()
 }
 fn python() -> PathBuf {
-    env::var("VIETDUB_PYTHON")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("python"))
+    if let Ok(program) = env::var("VIETDUB_PYTHON") {
+        return PathBuf::from(program);
+    }
+    if let Some(path) = env::var_os("PATH") {
+        for directory in env::split_paths(&path) {
+            for executable in ["python.exe", "python3", "python"] {
+                let candidate = directory.join(executable);
+                if candidate.is_file() {
+                    return candidate;
+                }
+            }
+        }
+    }
+    panic!("Python was not found; set VIETDUB_PYTHON to its executable path");
 }
 fn stage(project: Uuid) -> NewStageRun {
     let cache = CacheDescriptor {
