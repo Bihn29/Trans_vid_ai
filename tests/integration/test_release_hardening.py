@@ -17,7 +17,7 @@ def load_json(path: Path) -> dict[str, Any]:
 
 def test_all_schemas_are_valid_draft_2020_12() -> None:
     schemas = sorted((ROOT / "schemas").glob("*.schema.json"))
-    assert len(schemas) == 17
+    assert len(schemas) == 18
     for path in schemas:
         Draft202012Validator.check_schema(load_json(path))
 
