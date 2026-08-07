@@ -481,7 +481,7 @@ fn worker_model_path(path: &std::path::Path) -> Result<String, CoreError> {
         if let Some(rest) = value.strip_prefix(r"\\?\UNC\") {
             return Ok(format!(r"\\{rest}"));
         }
-        return Ok(value.strip_prefix(r"\\?\").unwrap_or(value).to_owned());
+        Ok(value.strip_prefix(r"\\?\").unwrap_or(value).to_owned())
     }
     #[cfg(not(windows))]
     Ok(value.to_owned())
