@@ -606,24 +606,25 @@ p {
 
 .video-frame {
   position: relative;
-  display: grid;
   width: 100%;
-  height: clamp(240px, 42vh, 420px);
-  min-height: 0;
+  max-height: clamp(240px, 42vh, 460px);
   overflow: hidden;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #273247;
   border-radius: 12px;
   background: #000;
 }
 
 .video-viewport {
-  display: grid;
-  height: 100%;
-  width: auto;
+  /* aspect-ratio is set inline from video metadata */
   max-width: 100%;
-  place-items: center;
-  overflow: hidden;
+  max-height: clamp(240px, 42vh, 460px);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #000;
 }
 

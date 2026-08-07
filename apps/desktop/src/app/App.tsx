@@ -569,6 +569,7 @@ export function App() {
                         src={videoUrl}
                         controls
                         preload="metadata"
+                        style={{ width: "100%", height: "100%", objectFit: "contain" }}
                         onLoadedMetadata={() => { setPlayerState("metadata"); logPlayerEvent("metadata_loaded"); }}
                         onCanPlay={() => { setPlayerState("canplay"); logPlayerEvent("can_play"); }}
                         onPlay={() => logPlayerEvent("play")}
@@ -577,6 +578,7 @@ export function App() {
                     </div>
                     {playerState === "loading" ? <div className="video-loading" role="status">{t("loadingVideoPreview")}</div> : null}
                   </div>
+
                   <div className="media-summary"><div><h2>{media.originalName}</h2><p>{formatDuration(media.metadata.duration_ms)} · {media.metadata.width}×{media.metadata.height} · {media.metadata.video_codec.toUpperCase()} · {formatBytes(media.artifact.size_bytes)}</p></div><Button onClick={() => void pickLocalVideo()}>{t("changeVideo")}</Button></div>
                   <section className="transcript-empty">
                     <strong>{t("transcript")}</strong>

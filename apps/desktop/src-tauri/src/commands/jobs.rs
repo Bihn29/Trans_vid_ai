@@ -28,29 +28,23 @@ pub fn start_transcript_job(
     project_id: Uuid,
 ) -> Result<Job, CommandError> {
     let project_jobs = state.queue.list_for_project(project_id)?;
-    if project_jobs.iter().any(|job| {
-        matches!(
-            job.status,
-            JobStatus::Queued | JobStatus::Running | JobStatus::Paused
-        )
-    }) {
-        return Err(CoreError::Conflict("active project job").into());
-    }
     let project = state.projects.get(project_id)?;
     let source_artifact_id = project
         .source_asset_id
         .ok_or(CoreError::NotFound("source artifact"))?;
     let source = state.artifacts.get(source_artifact_id)?;
-    if state.artifacts.verify(source.id)? != ArtifactVerification::Verified
-        || project
-            .config_snapshot
-            .get("source")
-            .and_then(|value| value.get("import_status"))
-            .and_then(|value| value.as_str())
-            != Some("ready")
-    {
-        return Err(CoreError::InvalidTransition.into());
-    }
+    let source_import_status = project
+        .config_snapshot
+        .get("source")
+        .and_then(|value| value.get("import_status"))
+        .and_then(|value| value.as_str());
+
+    validate_transcript_preflight(
+        &project_jobs,
+        state.artifacts.verify(source.id)?,
+        source_import_status,
+        state.asr_model_path.is_some(),
+    )?;
     let existing_segments = state.transcript.get_transcript(project_id)?;
     if !existing_segments.is_empty() {
         if existing_segments
@@ -744,5 +738,90 @@ fn media_tool_error_code(error: &MediaToolError) -> &'static str {
         MediaToolError::Tool(_) => "FFMPEG_FAILED",
         MediaToolError::Io(_) => "FILESYSTEM_ERROR",
         MediaToolError::Core(error) => error.code(),
+    }
+}
+
+fn validate_transcript_preflight(
+    project_jobs: &[Job],
+    source_artifact_verification: ArtifactVerification,
+    source_import_status: Option<&str>,
+    has_asr_model: bool,
+) -> Result<(), CommandError> {
+    if project_jobs.iter().any(|job| {
+        matches!(
+            job.status,
+            JobStatus::Queued | JobStatus::Running | JobStatus::Paused
+        )
+    }) {
+        return Err(CoreError::Conflict("active project job").into());
+    }
+    if source_artifact_verification != ArtifactVerification::Verified
+        || source_import_status != Some("ready")
+    {
+        return Err(CoreError::InvalidTransition.into());
+    }
+    if !has_asr_model {
+        return Err(super::projects::CommandError {
+            code: "SETUP_REQUIRED",
+        });
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn asr_preflight_blocks_when_model_is_missing() {
+        let result = validate_transcript_preflight(
+            &[],
+            ArtifactVerification::Verified,
+            Some("ready"),
+            false,
+        );
+        let err = result.expect_err("should require setup");
+        assert_eq!(err.code, "SETUP_REQUIRED");
+    }
+
+    #[test]
+    fn asr_preflight_blocks_when_jobs_active() {
+        let job = Job {
+            id: Uuid::new_v4(),
+            project_id: Uuid::new_v4(),
+            stage_run_id: Uuid::new_v4(),
+            job_type: StageName::Transcribe,
+            status: JobStatus::Running,
+            priority: 0,
+            progress: 1.0,
+            attempt: 1,
+            retry_of_job_id: None,
+            queued_at: String::new(),
+            started_at: None,
+            completed_at: None,
+            error_code: None,
+            safe_error_message: None,
+            pause_requested: false,
+            cancel_requested: false,
+        };
+        let result = validate_transcript_preflight(
+            &[job],
+            ArtifactVerification::Verified,
+            Some("ready"),
+            true,
+        );
+        let err = result.expect_err("should block active job");
+        assert_eq!(err.code, "CONFLICT");
+    }
+
+    #[test]
+    fn asr_preflight_succeeds_when_ready() {
+        let result = validate_transcript_preflight(
+            &[],
+            ArtifactVerification::Verified,
+            Some("ready"),
+            true,
+        );
+        assert!(result.is_ok());
     }
 }
