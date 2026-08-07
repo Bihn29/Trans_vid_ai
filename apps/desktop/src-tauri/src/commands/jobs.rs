@@ -816,12 +816,8 @@ mod tests {
 
     #[test]
     fn asr_preflight_succeeds_when_ready() {
-        let result = validate_transcript_preflight(
-            &[],
-            ArtifactVerification::Verified,
-            Some("ready"),
-            true,
-        );
+        let result =
+            validate_transcript_preflight(&[], ArtifactVerification::Verified, Some("ready"), true);
         assert!(result.is_ok());
     }
 }
